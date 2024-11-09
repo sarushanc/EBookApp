@@ -1,0 +1,30 @@
+﻿@model IEnumerable<UserViewModel>
+
+<h2>Registered Users</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>@user.UserName</td>
+                <td>
+                    <form asp-action="MakeAdmin" asp-controller="Home" asp-route-id="@user.Id" method="post">
+                        <button type="submit" class="btn btn-primary"
+                        @(user.IsAdmin ? "disabled" : "")>
+                            Make Admin
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
