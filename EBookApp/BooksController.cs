@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EBookApp.Models;
 using EBookApp.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EBookApp
 {
+    [Authorize]
     public class BooksController : Controller
     {
         private readonly ApplicationDbContext _context;
