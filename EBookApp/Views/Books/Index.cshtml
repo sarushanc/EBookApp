@@ -1,10 +1,19 @@
 ﻿@model IEnumerable<EBookApp.Models.Book>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Books";
 }
 
-<h1>Index</h1>
+<h1>Books</h1>
+
+<!-- Search Form -->
+<form asp-action="Index" method="get" class="form-inline mb-3">
+    <div class="form-group">
+        <input type="text" name="search" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Search books by title or author" />
+    </div>
+    <button type="submit" class="btn btn-primary ml-2">Search</button>
+    <a asp-action="Index" class="btn btn-secondary ml-2">Clear</a> <!-- Reset the search -->
+</form>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -26,14 +35,14 @@
             <tr>
                 <td>@item.Title</td>
                 <td>@item.Author</td>
-                <td>@item.Price.ToString("C")</td>
-                    <form asp-action="AddToCart" asp-controller="CartItems" method="post">
+                <td>@("Rs. " + item.Price.ToString("N2"))</td> <!-- Price with Rs. prefix -->
+                <form asp-action="AddToCart" asp-controller="CartItems" method="post">
                 <td>
-                        <input type="hidden" name="bookId" value="@item.Id" />
-                        <input type="number" name="quantity" min="1" value="1" class="form-control" style="width: 80px;" />
+                    <input type="hidden" name="bookId" value="@item.Id" />
+                    <input type="number" name="quantity" min="1" value="1" class="form-control" style="width: 80px;" />
                 </td>
                 <td>
-                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
                 </td>
                 </form>
                 <td>

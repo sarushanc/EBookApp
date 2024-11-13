@@ -22,9 +22,20 @@ namespace EBookApp
         }
 
         // GET: Books
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search)
         {
-            return View(await _context.Book.ToListAsync());
+            var books = from b in _context.Book select b;
+
+            // Apply search filter if search term is provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                books = books.Where(b =>
+                    (b.Title != null && b.Title.Contains(search)) ||
+                    (b.Author != null && b.Author.Contains(search))
+                );
+            }
+
+            return View(await books.ToListAsync());
         }
 
         // GET: Books/Details/5
