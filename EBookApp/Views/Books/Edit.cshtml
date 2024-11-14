@@ -1,54 +1,69 @@
 ﻿@model EBookApp.Models.Book
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Book";
 }
 
-<h1>Edit</h1>
+<h1 class="text-center my-4">@ViewData["Title"]</h1>
 
-<h4>Book</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="card shadow-sm mx-auto" style="max-width: 600px;">
+    <div class="card-body">
+        <h4 class="card-title text-center mb-4">Edit Book Details</h4>
+
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
+
+            <!-- Title Field -->
+            <div class="form-floating mb-3">
+                <input asp-for="Title" class="form-control" placeholder="Book Title" />
+                <label asp-for="Title" class="form-label">Title</label>
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Author" class="control-label"></label>
-                <input asp-for="Author" class="form-control" />
+
+            <!-- Author Field -->
+            <div class="form-floating mb-3">
+                <input asp-for="Author" class="form-control" placeholder="Author" />
+                <label asp-for="Author" class="form-label">Author</label>
                 <span asp-validation-for="Author" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
+
+            <!-- Price Field -->
+            <div class="form-floating mb-3">
+                <input asp-for="Price" class="form-control" placeholder="Price" />
+                <label asp-for="Price" class="form-label">Price (Rs.)</label>
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Category" class="control-label"></label>
-                <input asp-for="Category" class="form-control" />
+
+            <!-- Category Field -->
+            <div class="form-floating mb-3">
+                <input asp-for="Category" class="form-control" placeholder="Category" />
+                <label asp-for="Category" class="form-label">Category</label>
                 <span asp-validation-for="Category" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ISBN" class="control-label"></label>
-                <input asp-for="ISBN" class="form-control" />
+
+            <!-- ISBN Field -->
+            <div class="form-floating mb-3">
+                <input asp-for="ISBN" class="form-control" placeholder="ISBN" />
+                <label asp-for="ISBN" class="form-label">ISBN</label>
                 <span asp-validation-for="ISBN" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">Save</button>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<!-- Back to List Link -->
+<div class="text-center mt-4">
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
