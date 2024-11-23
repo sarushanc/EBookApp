@@ -35,7 +35,7 @@ static async Task SeedRolesAndAdminUser(IServiceProvider serviceProvider)
     }
 
     // Seed an Admin user
-    var adminEmail = "admin@ebook4u.com";
+    var adminEmail = "admin@ebookapp.com";
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
     if (adminUser == null)
     {

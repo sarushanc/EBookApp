@@ -19,8 +19,13 @@ namespace EBookApp.Controllers
             _roleManager = roleManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Pass role information to the view
+            ViewBag.IsAdmin = user != null && await _userManager.IsInRoleAsync(user, "Admin");
+
             return View();
         }
 

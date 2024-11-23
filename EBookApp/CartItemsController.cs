@@ -207,5 +207,68 @@ namespace EBookApp.Controllers
         {
             return _context.CartItem.Any(e => e.Id == id);
         }
+
+        public async Task<IActionResult> Checkout()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // Retrieve saved checkout details for the authenticated user
+            var savedDetails = await _context.CheckoutDetails
+                .Where(cd => cd.UserId == userId)
+                .ToListAsync();
+
+            var viewModel = new CheckoutViewModel
+            {
+                SavedDetails = savedDetails
+            };
+
+            return View(viewModel);
+        }
+
+        // Process Checkout Submission
+        [HttpPost]
+        public async Task<IActionResult> Checkout(CheckoutViewModel viewModel)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (viewModel.SelectedCheckoutId.HasValue)
+            {
+                // Use selected checkout details
+                var selectedDetails = await _context.CheckoutDetails
+                    .FirstOrDefaultAsync(cd => cd.Id == viewModel.SelectedCheckoutId.Value && cd.UserId == userId);
+
+                if (selectedDetails == null)
+                {
+                    ModelState.AddModelError("", "Invalid checkout details selected.");
+                    return View(viewModel);
+                }
+
+                // Process order using `selectedDetails`
+            }   
+            else if (ModelState.IsValid)
+            {
+                // Save new checkout details
+                var newDetails = viewModel.NewDetails;
+                newDetails.UserId = userId; // Assign dynamically
+
+                _context.CheckoutDetails.Add(newDetails);
+                await _context.SaveChangesAsync();
+
+                // Process order using `newDetails`
+            }
+            else
+            {
+                // Return with validation errors
+                return View(viewModel);
+            }
+
+            return RedirectToAction("OrderConfirmation");
+        }
+
+        // Order Confirmation Page
+        public IActionResult OrderConfirmation()
+        {
+            return View();
+        }
     }
 }

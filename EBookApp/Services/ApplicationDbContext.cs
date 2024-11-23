@@ -10,5 +10,6 @@ namespace EBookApp.Services
 
         public DbSet<Book> Book { get; set; } = default!;
         public DbSet<CartItem> CartItem { get; set; } = default!;
+        public DbSet<CheckoutDetails> CheckoutDetails { get; set; } = default!;
     }
 }
