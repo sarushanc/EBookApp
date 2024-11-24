@@ -7,57 +7,77 @@
     <p>Your one-stop destination for books.</p>
 </div>
 
-<!-- Shared Section -->
-<div class="mb-4">
-    <h2>Explore Features</h2>
-    <p>Access features tailored to your needs.</p>
-</div>
-
-<!-- Admin-Specific Section -->
-@if (ViewBag.IsAdmin != null && (bool)ViewBag.IsAdmin)
+@if (User.Identity.IsAuthenticated)
 {
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h3>Admin Panel</h3>
-        </div>
-        <div class="card-body">
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <a asp-controller="Books" asp-action="Index">Manage Books</a>
-                </li>
-                <li class="list-group-item">
-                    <a asp-controller="CartItems" asp-action="Index">View Your Cart Items</a>
-                </li>
-                <li class="list-group-item">
-                    <a asp-controller="Orders" asp-action="Index">Manage Orders</a>
-                </li>
-                <li class="list-group-item">
-                    <a asp-controller="Home" asp-action="UserList">View Users</a>
-                </li>
-            </ul>
-        </div>
+    <!-- Shared Section -->
+    <div class="mb-4">
+        <h2>Explore Features</h2>
+        <p>Access features tailored to your needs.</p>
     </div>
+
+    <!-- Admin-Specific Section -->
+    @if (ViewBag.IsAdmin != null && (bool)ViewBag.IsAdmin)
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3>Admin Panel</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a asp-controller="Books" asp-action="Index">Manage Books</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-controller="CartItems" asp-action="Index">View Your Cart Items</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-controller="Orders" asp-action="Index">Manage Orders</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-controller="Home" asp-action="UserList">View Users</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    }
+
+    <!-- User-Specific Section -->
+    @if (ViewBag.IsAdmin == null || !(bool)ViewBag.IsAdmin)
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h3>User Dashboard</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a asp-controller="Books" asp-action="Index">Browse Books</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-controller="CartItems" asp-action="Index">View Your Cart</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a asp-controller="Orders" asp-action="OrderHistory">View Order History</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    }
 }
-
-<!-- User-Specific Section -->
-@if (ViewBag.IsAdmin == null || !(bool)ViewBag.IsAdmin)
+else
 {
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-success text-white">
-            <h3>User Dashboard</h3>
-        </div>
-        <div class="card-body">
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <a asp-controller="Books" asp-action="Index">Browse Books</a>
-                </li>
-                <li class="list-group-item">
-                    <a asp-controller="CartItems" asp-action="Index">View Your Cart</a>
-                </li>
-                <li class="list-group-item">
-                    <a asp-controller="Orders" asp-action="OrderHistory">View Order History</a>
-                </li>
-            </ul>
+    <!-- Unauthenticated User Section -->
+    <div class="card shadow-sm mx-auto" style="max-width: 600px; position: relative; overflow: hidden;">
+        <!-- Background Image -->
+        <img src="~/images/book.jpeg" alt="Welcome to EBookApp" class="img-fluid" style="width: 100%; height: auto; position: absolute; top: 0; left: 0; z-index: 0;" />
+
+        <!-- Content Overlay -->
+        <div class="card-body text-center" style="position: relative; z-index: 1; color: white;">
+            <h3>Explore our wide range of books and manage your library with ease.</h3>
+            <p>
+                <partial name="_LoginPartial" />
+            </p>
         </div>
     </div>
+
 }

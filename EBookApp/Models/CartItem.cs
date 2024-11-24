@@ -12,12 +12,12 @@ namespace EBookApp.Models
         // Foreign key for Book
         public int BookId { get; set; }
         [ForeignKey("BookId")]
-        public Book? Book { get; set; }  // Navigation property - not required
+        public Book? Book { get; set; }  
 
         // Foreign key for User
         public required string UserId { get; set; }
         [ForeignKey("UserId")]
-        public IdentityUser? User { get; set; } // Navigation property - not required
+        public IdentityUser? User { get; set; } 
 
         public int Quantity { get; set; }
     }
