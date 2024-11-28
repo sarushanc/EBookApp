@@ -2,8 +2,27 @@
     ViewData["Title"] = "Order Confirmation";
 }
 
-<h1 class="text-center my-4">Thank You!</h1>
-<p class="text-center">Your order has been placed successfully.</p>
-<div class="text-center">
-    <a asp-action="Index" asp-controller="Books" class="btn btn-primary">Continue Shopping</a>
-</div>
+<h1 class="text-center my-4">Order Confirmed</h1>
+<p>Thank you for your purchase!</p>
+
+<h3>Order Details</h3>
+<p><strong>Order ID:</strong> @ViewData["OrderId"]</p>
+<p><strong>Order Date:</strong> @ViewData["OrderDate"]</p>
+<p><strong>Total Amount:</strong> Rs. @ViewData["TotalAmount"]</p>
+
+@if (ViewData["OrderItems"] is IEnumerable<EBookApp.Models.OrderItem> orderItems && orderItems.Any())
+{
+    <h4>Order Items</h4>
+    <ul>
+        @foreach (var item in orderItems)
+        {
+            <li>@item.Book?.Title ?? "Unknown Book" - @item.Quantity x Rs. @item.Price.ToString("N2")</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No items found in this order.</p>
+}
+
+<a asp-action="Index" class="btn btn-primary">Back to Books</a>

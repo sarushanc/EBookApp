@@ -1,0 +1,59 @@
+﻿@model IEnumerable<EBookApp.Models.UserOrderViewModel>
+
+@{
+    ViewData["Title"] = "Your Orders";
+}
+
+<h1 class="text-center my-4">Your Orders</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <p>You have no orders at the moment.</p>
+        <a asp-action="Index" asp-controller="Books" class="btn btn-primary mt-2"><i class="fas fa-book"></i> Browse Books</a>
+    </div>
+}
+else
+{
+    @foreach (var order in Model)
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Order ID: @order.OrderId</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Order Date:</strong> @order.OrderDate.ToString("dd MMM yyyy")</p>
+                <p><strong>Total Amount:</strong> Rs. @order.TotalAmount.ToString("N2")</p>
+
+                <h6>Items:</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Book Title</th>
+                                <th>Quantity</th>
+                                <th>Price (Rs.)</th>
+                                <th>Total (Rs.)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in order.Items)
+                            {
+                                <tr>
+                                    <td>@item.BookTitle</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.Price.ToString("N2")</td>
+                                    <td>@(item.Quantity * item.Price)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- FontAwesome for icons -->
+}

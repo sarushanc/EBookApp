@@ -208,11 +208,16 @@ namespace EBookApp.Controllers
             return _context.CartItem.Any(e => e.Id == id);
         }
 
+        // GET: CartItems/Checkout
         public async Task<IActionResult> Checkout()
         {
             var userId = _userManager.GetUserId(User);
 
-            // Retrieve saved checkout details for the authenticated user
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var savedDetails = await _context.CheckoutDetails
                 .Where(cd => cd.UserId == userId)
                 .ToListAsync();
@@ -225,50 +230,167 @@ namespace EBookApp.Controllers
             return View(viewModel);
         }
 
-        // Process Checkout Submission
         [HttpPost]
         public async Task<IActionResult> Checkout(CheckoutViewModel viewModel)
         {
             var userId = _userManager.GetUserId(User);
 
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account"); // Handle unauthenticated user
+            }
+
+            CheckoutDetails? billingDetails = null; // Allow nullable assignment
+
             if (viewModel.SelectedCheckoutId.HasValue)
             {
-                // Use selected checkout details
-                var selectedDetails = await _context.CheckoutDetails
+                billingDetails = await _context.CheckoutDetails
                     .FirstOrDefaultAsync(cd => cd.Id == viewModel.SelectedCheckoutId.Value && cd.UserId == userId);
 
-                if (selectedDetails == null)
+                if (billingDetails == null)
                 {
                     ModelState.AddModelError("", "Invalid checkout details selected.");
-                    return View(viewModel);
+                    return View(viewModel); // Return with validation errors
                 }
-
-                // Process order using `selectedDetails`
-            }   
+            }
             else if (ModelState.IsValid)
             {
-                // Save new checkout details
-                var newDetails = viewModel.NewDetails;
-                newDetails.UserId = userId; // Assign dynamically
+                // Assign UserId from the authenticated user context
+                viewModel.NewDetails.UserId = userId;
 
-                _context.CheckoutDetails.Add(newDetails);
+                billingDetails = viewModel.NewDetails;
+
+                _context.CheckoutDetails.Add(billingDetails);
                 await _context.SaveChangesAsync();
-
-                // Process order using `newDetails`
             }
             else
             {
-                // Return with validation errors
-                return View(viewModel);
+                return View(viewModel); // Return with validation errors
             }
 
-            return RedirectToAction("OrderConfirmation");
+            // Ensure billingDetails is not null before processing the order
+            if (billingDetails == null)
+            {
+                throw new InvalidOperationException("Failed to retrieve or create billing details.");
+            }
+
+            // Process the order
+            var orderId = await ProcessOrder(billingDetails);
+            return RedirectToAction("OrderConfirmation", new { orderId });
         }
 
-        // Order Confirmation Page
-        public IActionResult OrderConfirmation()
+
+        // Process order and save it
+        private async Task<int> ProcessOrder(CheckoutDetails billingDetails)
         {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new InvalidOperationException("User is not authenticated.");
+            }
+
+            var order = new Order
+            {
+                UserId = userId,
+                BillingDetailsId = billingDetails.Id,
+                BillingDetails = billingDetails,
+                OrderDate = DateTime.Now,
+                TotalAmount = 0,
+                OrderItems = new List<OrderItem>()
+            };
+
+            var cartItems = await _context.CartItem
+                .Where(c => c.UserId == userId)
+                .Include(c => c.Book)
+                .ToListAsync();
+
+            if (!cartItems.Any())
+            {
+                throw new InvalidOperationException("Cannot process order: Cart is empty.");
+            }
+
+            foreach (var cartItem in cartItems)
+            {
+                if (cartItem.Book == null)
+                {
+                    throw new InvalidOperationException($"CartItem with ID {cartItem.Id} has no associated Book.");
+                }
+
+                var orderItem = new OrderItem
+                {
+                    BookId = cartItem.BookId,
+                    Quantity = cartItem.Quantity,
+                    Price = cartItem.Book.Price,
+                    Order = order
+                };
+
+                order.OrderItems.Add(orderItem);
+                order.TotalAmount += cartItem.Quantity * cartItem.Book.Price;
+            }
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            _context.CartItem.RemoveRange(cartItems);
+            await _context.SaveChangesAsync();
+
+            return order.Id;
+        }
+
+        // GET: CartItems/OrderConfirmation
+        public async Task<IActionResult> OrderConfirmation(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems!)
+                .ThenInclude(oi => oi.Book!)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                return NotFound("Order not found.");
+            }
+
+            ViewData["OrderId"] = order.Id;
+            ViewData["OrderDate"] = order.OrderDate.ToString("dd/MM/yyyy");
+            ViewData["TotalAmount"] = order.TotalAmount;
+            ViewData["OrderItems"] = order.OrderItems;
+
             return View();
+        }
+
+        // GET: ViewOrders
+        public async Task<IActionResult> ViewOrders()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var orders = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Book)
+                .ToListAsync();
+
+            var orderViewModels = orders.Select(o => new UserOrderViewModel
+            {
+                OrderId = o.Id,
+                OrderDate = o.OrderDate,
+                TotalAmount = o.TotalAmount,
+                Items = o.OrderItems
+                    .Where(oi => oi != null) // Ensure non-null OrderItems
+                    .Select(oi => new UserOrderItemViewModel
+                    {
+                        BookTitle = oi.Book?.Title ?? "Unknown", // Handle null Book
+                        Quantity = oi.Quantity,
+                        Price = oi.Price
+                    }).ToList()
+            }).ToList();
+
+            return View(orderViewModels);
         }
     }
 }
