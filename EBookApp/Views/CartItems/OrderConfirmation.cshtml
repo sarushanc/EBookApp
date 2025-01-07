@@ -16,7 +16,11 @@
     <ul>
         @foreach (var item in orderItems)
         {
-            <li>@item.Book?.Title ?? "Unknown Book" - @item.Quantity x Rs. @item.Price.ToString("N2")</li>
+            <li>
+                <strong>@(item.Book?.Title ?? "Unknown Book")</strong>
+                - Quantity: @item.Quantity
+                x Rs. @item.Price.ToString("N2")
+            </li>
         }
     </ul>
 }

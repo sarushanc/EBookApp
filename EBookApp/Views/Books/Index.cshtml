@@ -14,9 +14,12 @@
 </form>
 
 <!-- Create New Book Link -->
-<p class="text-right">
-    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus-circle"></i> Create New</a>
-</p>
+@if (User.IsInRole("Admin"))
+{
+    <p class="text-right">
+        <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus-circle"></i> Create New</a>
+    </p>
+}
 
 <!-- Books Table -->
 <div class="card shadow-sm">
@@ -28,7 +31,10 @@
                     <th>Author</th>
                     <th>Price</th>
                     <th>Quantity</th>
-                    <th></th>
+                    @if (!User.IsInRole("Admin"))
+                    {
+                        <th></th>
+                    }
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -44,15 +50,33 @@
                             <input type="hidden" name="bookId" value="@item.Id" />
                             <input type="number" name="quantity" min="1" value="1" class="form-control w-75 mx-auto" />
                         </td>
-                        <td>
-                            <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
-                        </td>
+                        
+                        @if (!User.IsInRole("Admin"))
+                        {
+                            <td>
+                                <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                            </td>
+                        }
+                        
                         </form>
                         <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm mx-1"><i class="fas fa-edit"></i> Edit</a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm mx-1"><i class="fas fa-info-circle"></i> Details</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm mx-1"><i class="fas fa-trash"></i> Delete</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <!-- Admin actions -->
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm mx-1">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm mx-1">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            }
+
+                            <!-- Common action for all users -->
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm mx-1">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
                         </td>
+
                     </tr>
                 }
             </tbody>
