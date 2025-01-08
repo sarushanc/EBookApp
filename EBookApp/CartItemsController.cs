@@ -25,13 +25,25 @@ namespace EBookApp.Controllers
         // GET: CartItems
         public async Task<IActionResult> Index()
         {
-            var userId = _userManager.GetUserId(User);
-            var cartItems = await _context.CartItem
-                .Where(c => c.UserId == userId)
-                .Include(c => c.Book)
-                .ToListAsync();
-
-            return View(cartItems);
+            if (User.IsInRole("Admin"))
+            {
+                // Admin sees all cart items
+                var cartItems = await _context.CartItem
+                    .Include(c => c.Book)
+                    .Include(c => c.User) // Include User details for admin view
+                    .ToListAsync();
+                return View(cartItems);
+            }
+            else
+            {
+                // Regular user sees only their own cart items
+                var userId = _userManager.GetUserId(User);
+                var cartItems = await _context.CartItem
+                    .Where(c => c.UserId == userId)
+                    .Include(c => c.Book)
+                    .ToListAsync();
+                return View(cartItems);
+            }
         }
 
         // POST: CartItems/AddToCart
@@ -383,6 +395,33 @@ namespace EBookApp.Controllers
                 Items = o.OrderItems
                     .Where(oi => oi != null) // Ensure non-null OrderItems
                     .Select(oi => new UserOrderItemViewModel
+                    {
+                        BookTitle = oi.Book?.Title ?? "Unknown", // Handle null Book
+                        Quantity = oi.Quantity,
+                        Price = oi.Price
+                    }).ToList()
+            }).ToList();
+
+            return View(orderViewModels);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ViewAllOrders()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Book)
+                .ToListAsync();
+
+            var orderViewModels = orders.Select(o => new AdminOrderViewModel
+            {
+                OrderId = o.Id,
+                UserId = o.UserId,
+                OrderDate = o.OrderDate,
+                TotalAmount = o.TotalAmount,
+                Items = o.OrderItems
+                    .Where(oi => oi != null) // Ensure non-null OrderItems
+                    .Select(oi => new AdminOrderItemViewModel
                     {
                         BookTitle = oi.Book?.Title ?? "Unknown", // Handle null Book
                         Quantity = oi.Quantity,

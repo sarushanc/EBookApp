@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<EBookApp.Models.CartItem>
 
 @{
-    ViewData["Title"] = "Your Cart";
+    ViewData["Title"] = "Cart";
 }
 
 <h2 class="text-center my-4">@ViewData["Title"]</h2>
@@ -11,6 +11,10 @@
         <table class="table table-bordered table-hover">
             <thead class="table-secondary">
                 <tr>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <th>User</th> <!-- Show user information for admin -->
+                    }
                     <th>Book Title</th>
                     <th class="text-center">Quantity</th>
                     <th class="text-end">Price</th>
@@ -22,6 +26,10 @@
                 @foreach (var item in Model)
                 {
                     <tr>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <td>@(item.User?.UserName ?? "Unknown User")</td> <!-- Display username -->
+                        }
                         <td>@(item.Book?.Title ?? "Unknown Book")</td>
                         <td class="text-center">@item.Quantity</td>
                         <td class="text-end">@("Rs. " + (item.Book?.Price.ToString("N2") ?? "N/A"))</td>
@@ -37,11 +45,14 @@
         </table>
 
         <!-- Cart Total and Checkout Button -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            <h3>Total: @("Rs. " + Model.Sum(item => item.Book != null ? item.Quantity * item.Book.Price : 0).ToString("N2"))</h3>
-            <form asp-action="Checkout" asp-controller="CartItems" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Checkout</button>
-            </form>
-        </div>
+        @if (!User.IsInRole("Admin"))
+        {
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <h3>Total: @("Rs. " + Model.Sum(item => item.Book != null ? item.Quantity * item.Book.Price : 0).ToString("N2"))</h3>
+                <form asp-action="Checkout" asp-controller="CartItems" method="post">
+                    <button type="submit" class="btn btn-primary btn-lg">Checkout</button>
+                </form>
+            </div>
+        }
     </div>
 </div>
